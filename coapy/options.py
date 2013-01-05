@@ -113,6 +113,14 @@ class _Base (object):
            CoAP option with a default value.
     """
 
+    Repeatable = False
+    """The most Options are not Repeatable. This means they can occur only once
+        in a Message
+
+    :note: This value is overridden in each class that can occur multiple times
+            in a Message
+    """
+
     value = property()
     """The option value.
 
@@ -374,6 +382,7 @@ class Etag (_StringValue_mixin, _Base):
     Type = 4
     Name = 'ETag'
     Default = None
+    Repeatable = True
 
     MIN_VALUE_LENGTH = 1
     """An ETag value :attr:`must have at least one octet<coapy.options._StringValue_mixin.MIN_VALUE_LENGTH>`."""
@@ -405,6 +414,7 @@ class LocationPath (_UriPath_mixin, _Base):
     Type = 6
     Name = 'Location-Path'
     Default = None
+    Repeatable = True
 
 class UriPort (_IntegerValue_mixin, _Base):
     """The Uri-Host, Uri-Port, Uri-Path and Uri-Query Options are used to 
@@ -429,6 +439,7 @@ class LocationQuery (_UriPath_mixin, _Base):
     Type = 8
     Name = 'Location-Query'
     Default = None
+    Repeatable = True
 
 class UriPath (_StringValue_mixin, _Base):
     """The Uri-Host, Uri-Port, Uri-Path and Uri-Query Options are used to
@@ -441,6 +452,7 @@ class UriPath (_StringValue_mixin, _Base):
     Type = 9
     Name = 'Uri-Path'
     Default = None
+    Repeatable = True
 
     _value = Default
 
@@ -464,6 +476,8 @@ class Accept (_IntegerValue_mixin, _Base):
 
     Type = 12
     Name = 'Accept'
+    Default = None
+    Repeatable = True
     MAX_VALUE = 0xFFFF
     """An Accept value :attr:`cannot exceed two octets in length<coapy.options._IntegerValue_mixin.MAX_VALUE>`."""
 
@@ -475,6 +489,7 @@ class IfMatch (_StringValue_mixin, _Base):
     Type = 13
     Name = 'If-Match'
     Default = None
+    Repeatable = True
 
     MIN_VALUE_LENGTH = 0
     """A If-Match value :attr:`must have at least one octet<coapy.options._StringValue_mixin.MIN_VALUE_LENGTH>`."""
@@ -494,6 +509,7 @@ class UriQuery (_StringValue_mixin, _Base):
     Type = 15
     Name = 'Uri-Query'
     Default = None
+    Repeatable = True
 
     _value = Default
 
@@ -651,7 +667,7 @@ def encode (options, ignore_if_default=True):
         num_options += 1
     return (num_options, ''.join(packed_pieces))
 
-# TODO FS_coapy
+# TODO FS_coapy (Nothing Change here?)
 def decode (num_options, payload):
     """Decode a set of CoAP options and extract a message body.
 
@@ -671,22 +687,17 @@ def decode (num_options, payload):
 
     type_val = 0
     options = set()
-    print 'Number of Options',num_options
     while 0 < num_options:
         num_options -= 1
         value_start_index = 1
         odl = ord(payload[0])
-        print 'odl =',odl
         type_val += (odl >> 4)
-        print 'type_val =',type_val
         length = odl & 0x0F
-        print 'length =',length
         if 15 == length:
-            print 'extra length detected'
             length += ord(payload[value_start_index])
-            print 'length =',length
             value_start_index += 1
         value_end_index = value_start_index + length
+        # Skip Fencepost Option
         if 0 != (type_val % OPTION_TYPE_FENCEPOST):
             option_class = Registry.get(type_val)
             if option_class is not None:
@@ -694,7 +705,6 @@ def decode (num_options, payload):
             elif not option_type_is_elective(type_val):
                 raise UnrecognizedOptionError(type_val, payload[value_start_index:value_end_index])
         payload = payload[value_end_index:]
-        print options
     return (options, payload)
 
 Registry = { }

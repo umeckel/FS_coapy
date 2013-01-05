@@ -185,6 +185,8 @@ class Message (object):
         """
         self.__options.pop(self._classForOption(opt))
 
+    # TODO FS_coap
+    # This function must handle that Options can occur multiple times 
     def findOption (self, opt):
         """Locate the given option within the message.
 
