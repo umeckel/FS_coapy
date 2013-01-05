@@ -81,11 +81,18 @@ class Message (object):
 
     OptionKeywords = { 'content_type' : coapy.options.ContentType,
                        'max_age' : coapy.options.MaxAge,
-                       'uri_scheme' : coapy.options.UriScheme,
+                       'proxi_uri' : coapy.options.ProxyUri,
                        'etag' : coapy.options.Etag,
-                       'uri_authority' : coapy.options.UriAuthority,
-                       'location' : coapy.options.Location,
-                       'uri_path' : coapy.options.UriPath }
+                       'uri_host' : coapy.options.UriHost,
+                       'location_path' : coapy.options.LocationPath,
+                       'uri_port' : coapy.options.UriPort,
+                       'location_query' : coapy.options.LocationQuery,
+                       'uri_path' : coapy.options.UriPath,
+                       'token' : coapy.options.Token,
+                       'accept' : coapy.options.Accept,
+                       'if_match' : coapy.options.IfMatch,
+                       'uri_query' : coapy.options.UriQuery,
+                       'if_none_match' : coapy.options.IfNoneMatch }
     """A map from Python identifiers to :mod:`option classes<coapy.options>`.
 
     These identifiers can be provided as keyword parameters to the
@@ -218,32 +225,65 @@ class Message (object):
     payload = property(_get_payload, _set_payload)
 
     def build_uri (self, explicit=False):
-        uri_scheme = self.findOption(coapy.options.UriScheme)
-        uri_authority = self.findOption(coapy.options.UriAuthority)
-        uri_path = self.findOption(coapy.options.UriPath)
-        resp = []
-        val = None
-        if uri_scheme is not None:
-            val = uri_scheme
-        elif explicit:
-            val = coapy.options.UriScheme.Default
-        if val is not None:
-            resp.append(val)
-            resp.append(':')
-        val = None
-        if uri_authority is not None:
-            val = uri_authority.value
-        elif explicit:
-            val = coapy.options.UriAuthority.Default
-        if val is not None:
-            resp.append('//')
-            resp.append(val)
+        # Only coap (not coaps) support
+        # Building like coap-08 Section 6.5. Composing URIs from Options
+        # TODO percent-encoding
+        uri = ''
+        host = ''
+        port = ''
+        path = ''
+        query = ''
 
-        val = coapy.options.UriPath.Default
-        if uri_path is not None:
-            val = uri_path.value
-        resp.append('/%s' % (val,))
-        return ''.join(resp)
+        # Step 1
+        uri = uri + 'coap://'
+
+        #Step 2
+        uri_host = self.findOption(coapy.options.UriHost)
+        if uri_host is not None:
+            # TODO valid check
+            uri = uri + uri_host.value
+        else:
+            uri = uri + coapy.options.UriHost.Default 
+
+
+        #Step 3
+        uri_port = self.findOption(coapy.options.UriPort)
+        if uri_host is not None:
+            # TODO valid check
+            uri = uri + ':' + uri_host.value
+        else:
+            uri = uri + ':5683' 
+
+        
+        
+        # OLD URI Build with coap-03 with UriScheme/Authority Option
+        #
+        #uri_scheme = self.findOption(coapy.options.UriScheme)
+        #uri_authority = self.findOption(coapy.options.UriAuthority)
+        #uri_path = self.findOption(coapy.options.UriPath)
+        #resp = []
+        #val = None
+        #if uri_scheme is not None:
+        #    val = uri_scheme
+        #elif explicit:
+        #    val = coapy.options.UriScheme.Default
+        #if val is not None:
+        #    resp.append(val)
+        #    resp.append(':')
+        #val = None
+        #if uri_authority is not None:
+        #    val = uri_authority.value
+        #elif explicit:
+        #    val = coapy.options.UriAuthority.Default
+        #if val is not None:
+        #    resp.append('//')
+        #    resp.append(val)
+
+        #val = coapy.options.UriPath.Default
+        #if uri_path is not None:
+        #    val = uri_path.value
+        #resp.append('/%s' % (val,))
+        #return ''.join(resp)
 
     def __str__ (self):
         resp = [ self._TransactionTypeMap[self.__transactionType] ]
@@ -299,6 +339,8 @@ class Message (object):
         (code, transaction_id) = struct.unpack('!BH', packed[1:4])
         (options, packed) = coapy.options.decode(num_options, packed[4:])
         instance = cls(transaction_type=transaction_type, code=code, payload=packed)
+
+        # TODO Allow Repeatable Options
         for opt in options:
             instance.__options[type(opt)] = opt
         return (transaction_id, instance)

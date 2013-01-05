@@ -17,7 +17,7 @@ import getopt
 
 # --verbose (-v): Print all message metadata
 verbose = False
-port = coapy.COAP_PORT
+port = coapy.COAP_PORT 
 address_family = socket.AF_INET
 # --discovery-addresses csv (-D): Provide a comma-separated list of
 #   host names for local interfaces on which CoAP service discovery

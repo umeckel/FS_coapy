@@ -5,9 +5,13 @@ import coapy.options
 import coapy.link
 import socket
 
-uri_path = '.well-known/r'
-host = 'ns.tzi.org'
-port = 61616
+uri_path = '.well-known/'
+host = 'vs0.inf.ethz.ch'
+#host = 'ns.tzi.org'
+#host = '129.132.15.80'
+host = '127.0.0.1'
+#port = 5683 
+port = coapy.COAP_PORT
 verbose = False
 output_path = None
 block_option = None

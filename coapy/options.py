@@ -179,7 +179,8 @@ class _Base (object):
         """Return ``True`` iff the current value of the option is
         equal to the default value of the option.
 
-        This is used by :func:`encode<coapy.options.encode>` to avoid unnececessarily packing options."""
+        This is used by :func:`encode<coapy.options.encode>` to avoid unnececessarily packing options.
+        """
         
         return self.Default == self.value
 
@@ -266,19 +267,42 @@ class _IntegerValue_mixin (object):
 
     packed = property(lambda _s: pack_vlint(_s._value))
 
+# There is no UriScheme Option in coap-08 ? But also not in 03 ?
+#class UriScheme (_StringValue_mixin, _Base):
+#    """The schema part of the URI."""
+#    
+#    Type = 3
+#    Name = 'Uri-Scheme'
+#    Default = 'coap'
+#    """The default URI scheme is ``coap``."""
+#    
+#    _value = Default
+
+# There is no UriAuthority Option in coap-08 anymore
+# its split into Uri-Host and Uri-Port
+#class UriAuthority (_StringValue_mixin, _Base):
+#    """The authority (host+port) part of the URI."""
+#    
+#    Type = 5
+#    Name = 'Uri-Authority'
+#    Default = ''
+#    """By default, the URI authority is empty."""
+#    
+#    _value = Default
+
 class ContentType (_Base):
     """The Internet media type describing the message body."""
 
     Type = 1
     Name = 'Content-type'
-    Default = 0
-    """The default content type is ``text/plain``."""
+    Default = None
+    """There is no default Content Type anymore in coap-08."""
 
     _value = Default
 
     def _setValue (self, value):
         value = int(value)
-        if (0 > value) or (255 < value):
+        if (0 > value) or (65535 < value):
             raise ValueError(value)
         self._value = value
 
@@ -321,67 +345,171 @@ class ContentType (_Base):
     def __str__ (self):
         return '%s: %s' % (self.Name, self.value_as_string)
 
-class UriScheme (_StringValue_mixin, _Base):
-    """The schema part of the URI."""
-    
-    Type = 3
-    Name = 'Uri-Scheme'
-    Default = 'coap'
-    """The default URI scheme is ``coap``."""
-    
-    _value = Default
-
-class UriAuthority (_StringValue_mixin, _Base):
-    """The authority (host+port) part of the URI."""
-    
-    Type = 5
-    Name = 'Uri-Authority'
-    Default = ''
-    """By default, the URI authority is empty."""
-    
-    _value = Default
-
-class UriPath (_UriPath_mixin, _Base):
-    """The absolute path part of the URI.
-
-    Since all CoAP URI paths are absolute, the leading slash is elided
-    from the option value."""
-
-    Type = 9
-    Name = 'Uri-Path'
-    Default = ''
-    """By default, the URI path is ``/``, represented as an empty string."""
-
-    _value = Default
-
 class MaxAge (_IntegerValue_mixin, _Base):
     """The maximum age of a resource for use in cache control, in seconds."""
     Type = 2
     Name = 'Max-age'
     Default = 60
 
+class ProxyUri (_UriPath_mixin, _Base):
+    """The Proxy-Uri Option is used to make a request to a proxy (see               
+   Section 5.7).  The proxy is requested to forward the request or              
+   service it from a valid cache, and return the response.                      
+                                                                                
+   #TODO
+   The option value is an absolute-URI ([RFC3986], Section 4.3).  In            
+   case the absolute-URI doesn't fit within a single option, the Proxy-         
+   Uri Option MAY be included multiple times in a request such that the         
+   concatenation of the values results in the single absolute-URI."""
+
+    Type = 3
+    Name = 'Proxy-Path'
+    Default = None
+
+    _value = Default
+
 class Etag (_StringValue_mixin, _Base):
     """An opaque sequence of bytes specifying the version of resource representation."""
     
     Type = 4
-    Name = 'Etag'
+    Name = 'ETag'
     Default = None
 
     MIN_VALUE_LENGTH = 1
     """An ETag value :attr:`must have at least one octet<coapy.options._StringValue_mixin.MIN_VALUE_LENGTH>`."""
 
-    MAX_VALUE_LENGTH = 4
-    """An ETag value :attr:`cannot exceed four octets in length<coapy.options._StringValue_mixin.MAX_VALUE_LENGTH>`."""
+    MAX_VALUE_LENGTH = 8
+    """An ETag value :attr:`cannot exceed eight octets in length<coapy.options._StringValue_mixin.MAX_VALUE_LENGTH>`."""
 
-class Location (_UriPath_mixin, _Base):
-    """The location of a resource.
+class UriHost (_StringValue_mixin, _Base):
+    """The Uri-Host, Uri-Port, Uri-Path and Uri-Query Options are used to
+    specify the target resource of a request to a CoAP origin server.
+
+    The Uri-Host Option specifies the Internet host of the resource           
+    being requested"""
+
+    Type = 5
+    Name = 'Uri-Host'
+    Default = ''
+
+    _value = Default
+
+class LocationPath (_UriPath_mixin, _Base):
+    """ The Location-Path indicates the location of a resource as an 
+    absolute path URI. The Location-Path Option is          
+   similar to the Uri-Path Option.
 
     Normally used in in a response to indicate the location of a newly
     created resource."""
     
     Type = 6
-    Name = 'Location'
+    Name = 'Location-Path'
     Default = None
+
+class UriPort (_IntegerValue_mixin, _Base):
+    """The Uri-Host, Uri-Port, Uri-Path and Uri-Query Options are used to 
+   specify the target resource of a request to a CoAP origin server.       
+   The options encode the different components of the request URI in a
+   way that no percent-encoding is visible in the option values and that
+   the full URI can be reconstructed at any involved end-point."""
+
+    Type = 7
+    Name = 'Uri-Port'
+    MAX_VALUE = 0xFFFF
+    """An Uri-Port value :attr:`cannot exceed two octets in length<coapy.options._IntegerValue_mixin.MAX_VALUE>`."""
+
+class LocationQuery (_UriPath_mixin, _Base):
+    """ The Location-Path and Location-Query Options indicates the location
+    of a resource as an absolute path URI.  The Location-Query Option similar 
+    to the Uri-Query Option.
+
+    Normally used in in a response to indicate the location of a newly
+    created resource."""
+    
+    Type = 8
+    Name = 'Location-Query'
+    Default = None
+
+class UriPath (_StringValue_mixin, _Base):
+    """The Uri-Host, Uri-Port, Uri-Path and Uri-Query Options are used to
+    specify the target resource of a request to a CoAP origin server.
+     
+    Each Uri-Path Option specifies one segment of the absolute path to
+    the resource."""
+
+
+    Type = 9
+    Name = 'Uri-Path'
+    Default = None
+
+    _value = Default
+
+class Token (_StringValue_mixin, _Base):
+    """A client-generared Token represented as opaque sequence of bytes."""
+    
+    Type = 11
+    Name = 'Token'
+    Default = None
+
+    MIN_VALUE_LENGTH = 1
+    """A Token value :attr:`must have at least one octet<coapy.options._StringValue_mixin.MIN_VALUE_LENGTH>`."""
+
+    MAX_VALUE_LENGTH = 8
+    """A Token value :attr:`cannot exceed eight octets in length<coapy.options._StringValue_mixin.MAX_VALUE_LENGTH>`."""
+
+class Accept (_IntegerValue_mixin, _Base):
+    """The CoAP Accept option indicates when included one or more times in a
+    request, one or more media types, each of which is an acceptable
+    media type for the client, in the order of preference."""
+
+    Type = 12
+    Name = 'Accept'
+    MAX_VALUE = 0xFFFF
+    """An Accept value :attr:`cannot exceed two octets in length<coapy.options._IntegerValue_mixin.MAX_VALUE>`."""
+
+class IfMatch (_StringValue_mixin, _Base):
+    """The value of an If-Match option is either an ETag or the empty
+    string.  An empty string places the precondition on the existence of
+    any current representation for the target resource."""
+    
+    Type = 13
+    Name = 'If-Match'
+    Default = None
+
+    MIN_VALUE_LENGTH = 0
+    """A If-Match value :attr:`must have at least one octet<coapy.options._StringValue_mixin.MIN_VALUE_LENGTH>`."""
+
+    MAX_VALUE_LENGTH = 8
+    """A If-Match value :attr:`cannot exceed eight octets in length<coapy.options._StringValue_mixin.MAX_VALUE_LENGTH>`."""
+
+class UriQuery (_StringValue_mixin, _Base):
+    """The Uri-Host, Uri-Port, Uri-Path and Uri-Query Options are used to
+    specify the target resource of a request to a CoAP origin server.
+     
+    each Uri-Query Option specifies one argument parameterizing the
+    resource.
+    """
+
+
+    Type = 15
+    Name = 'Uri-Query'
+    Default = None
+
+    _value = Default
+
+class IfNoneMatch (_Base):
+    """If the target resource does exist, then the server MUST NOT perform
+    the requested method.  Instead, the server MUST respond with the 4.12
+    (Precondition Failed) response code.
+    """
+    Type = 21
+    Name = 'If-None-Match'
+    Default = None
+
+    _value = Default
+
+
+# TODO Observe Option
 
 class Block (_Base):
     """Support block-wise transfers of large resources.
@@ -531,14 +659,20 @@ def decode (num_options, payload):
 
     type_val = 0
     options = set()
+    print 'Number of Options',num_options
     while 0 < num_options:
         num_options -= 1
         value_start_index = 1
         odl = ord(payload[0])
+        print 'odl =',odl
         type_val += (odl >> 4)
+        print 'type_val =',type_val
         length = odl & 0x0F
+        print 'length =',length
         if 15 == length:
+            print 'extra length detected'
             length += ord(payload[value_start_index])
+            print 'length =',length
             value_start_index += 1
         value_end_index = value_start_index + length
         if 0 != (type_val % OPTION_TYPE_FENCEPOST):
@@ -548,12 +682,16 @@ def decode (num_options, payload):
             elif not option_type_is_elective(type_val):
                 raise UnrecognizedOptionError(type_val, payload[value_start_index:value_end_index])
         payload = payload[value_end_index:]
+        print options
     return (options, payload)
 
 Registry = { }
 """A map from integral option types to the Python class that implements the option."""
 
-for _opt in (ContentType, UriScheme, UriAuthority, UriPath,
-            Location, MaxAge, Etag, Block):
+#for _opt in (ContentType, UriScheme, UriAuthority, UriPath,
+#            Location, MaxAge, Etag, Block):
+for _opt in (ContentType,MaxAge,ProxyUri,Etag,UriHost,LocationPath,
+             UriPort,LocationQuery,UriPath,Token,Accept,IfMatch,
+             UriQuery,IfNoneMatch):
     Registry[_opt.Type] = _opt
 

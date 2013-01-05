@@ -25,7 +25,7 @@ import coapy.link
 import socket
 
 uri_path = '.well-known/r'
-port = coapy.COAP_PORT
+port = coapy.COAP_PORT + 1
 interface_address = socket.gethostname()
 verbose = False
 address_family = socket.AF_INET
