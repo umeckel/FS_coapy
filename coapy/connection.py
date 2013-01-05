@@ -31,6 +31,7 @@
 # 
 
 import coapy.options
+import coapy.constants
 import socket
 import struct
 import binascii
@@ -152,11 +153,11 @@ class Message (object):
 
         If the option can appear multiple times, this method is
         intended to add the new value to the existing ones.
-
-        :warning: Currently multi-valued options are not supported and
-                  this is equivalent to :meth:`.replaceOption`.
         """
-        self.__options[type(opt)] = opt
+        if self.__options.has_key(type(opt)):
+            self.__options[type(opt)].append(opt)
+        else:
+            self.__options[type(opt)] = [opt]
         return self
 
     def replaceOption (self, opt):
@@ -165,7 +166,7 @@ class Message (object):
         If the option is already present in message, its previous
         value is replaced by the new one.
         """
-        self.__options[type(opt)] = opt
+        self.__options[type(opt)] = [opt]
         return self
 
     def _classForOption (self, opt):
@@ -244,8 +245,9 @@ class Message (object):
         uri_host = self.findOption(coapy.options.UriHost)
         if uri_host is not None:
             # TODO valid check
-            uri = uri + uri_host.value
+            uri = uri + uri_host[0].value
         else:
+            #TODO How to get the Host?
             uri = uri + coapy.options.UriHost.Default 
 
 
@@ -253,11 +255,31 @@ class Message (object):
         uri_port = self.findOption(coapy.options.UriPort)
         if uri_host is not None:
             # TODO valid check
-            uri = uri + ':' + uri_host.value
+            uri = uri + ':' + uri_host[0].value
         else:
-            uri = uri + ':5683' 
+            uri = uri + ':' + coapy.constants.COAP_PORT
 
-        
+        #Step 4 
+        uri_path = self.findOption(coapy.options.UriPath)
+        if uri_path is not None:
+            # TODO valid check
+            for up in uri_path:
+                uri = uri + '/' + up.value
+        else:
+            #TODO slash needed?
+            uri = uri + '/'
+
+        #Step 5
+        uri_query = self.findOption(coapy.options.UriQuery)
+        if uri_query is not None:
+            # TODO valid check
+            uri = uri + '?'
+            if len(uri_query) < 2:
+                uri = uri + up.value
+            else:
+                uri = uri + uri_query[0].value
+            for uq in uri_query[1:]:
+                uri = uri + '&' + up.value
         
         # OLD URI Build with coap-03 with UriScheme/Authority Option
         #
