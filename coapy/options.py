@@ -593,6 +593,7 @@ class UnrecognizedOptionError (Exception):
     def __str__ (self):
         return '%s: type=%d, value=%s' % (self.__class__.__name__, self.option_type, binascii.hexlify(self.option_value))
 
+# TODO FS_coapy
 def encode (options, ignore_if_default=True):
     """Encode a set of CoAP options for transmission.
 
@@ -640,6 +641,7 @@ def encode (options, ignore_if_default=True):
         num_options += 1
     return (num_options, ''.join(packed_pieces))
 
+# TODO FS_coapy
 def decode (num_options, payload):
     """Decode a set of CoAP options and extract a message body.
 

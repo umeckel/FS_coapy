@@ -224,6 +224,7 @@ class Message (object):
         self.__payload = payload
     payload = property(_get_payload, _set_payload)
 
+    # TODO FS_coapy 
     def build_uri (self, explicit=False):
         # Only coap (not coaps) support
         # Building like coap-08 Section 6.5. Composing URIs from Options
