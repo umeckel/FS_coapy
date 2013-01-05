@@ -622,8 +622,18 @@ def encode (options, ignore_if_default=True):
             continue
         delta = opt.Type - type_val
         while MAX_DELTA < delta:
-            fencepost = OPTION_TYPE_FENCEPOST * int((opt.Type + OPTION_TYPE_FENCEPOST - 1) / OPTION_TYPE_FENCEPOST)
+            # Which Fencepost Option did we finally need? (14,28,42,...)
+            fencepost = (OPTION_TYPE_FENCEPOST * int((opt.Type + OPTION_TYPE_FENCEPOST - 1) / OPTION_TYPE_FENCEPOST)) - 1
+            # fp_multiplier (14 => 1,28 => 2,3 => 42,...)
+            fp_multiplier = fencepost / OPTION_TYPE_FENCEPOST
             fp_delta = fencepost - type_val
+            # Did we need a intermediate Fencpost Option ?
+            while fp_delta > 15:
+                fp_multiplier = fp_multiplier - 1
+                fencepost = fp_multiplier * OPTION_TYPE_FENCEPOST
+                fp_delta = fencepost - type_val
+
+            # Option with delta fp_delta and length 0 (empty) 
             packed_pieces.append(chr(fp_delta << 4))
             num_options += 1
             type_val = fencepost
