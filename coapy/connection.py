@@ -145,6 +145,8 @@ class Message (object):
         return tuple(sorted(self.__options.itervalues(), lambda _a,_b: cmp(_a.Type, _b.Type)))
     options = property(_get_options)
 
+    # TODO FS_coapy
+    # Same Option Type can occur multiple times
     def addOption (self, opt):
         """Add a new option instance.
 

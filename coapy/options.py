@@ -593,7 +593,7 @@ class UnrecognizedOptionError (Exception):
     def __str__ (self):
         return '%s: type=%d, value=%s' % (self.__class__.__name__, self.option_type, binascii.hexlify(self.option_value))
 
-# TODO FS_coapy
+# TODO FS_coapy (MAYBE DONE)
 def encode (options, ignore_if_default=True):
     """Encode a set of CoAP options for transmission.
 
@@ -614,7 +614,7 @@ def encode (options, ignore_if_default=True):
     option_list = sorted(options, lambda _a,_b: cmp(_a.Type, _b.Type))
     packed_pieces = []
     type_val = 0
-    MAX_DELTA = 14
+    MAX_DELTA = 15
     OVER_LENGTH = 15
     num_options = 0
     for opt in option_list:
@@ -627,8 +627,8 @@ def encode (options, ignore_if_default=True):
             # fp_multiplier (14 => 1,28 => 2,3 => 42,...)
             fp_multiplier = fencepost / OPTION_TYPE_FENCEPOST
             fp_delta = fencepost - type_val
-            # Did we need a intermediate Fencpost Option ?
-            while fp_delta > 15:
+            # Did we need a intermediate Fencepost Option ?
+            while fp_delta > MAX_DELTA:
                 fp_multiplier = fp_multiplier - 1
                 fencepost = fp_multiplier * OPTION_TYPE_FENCEPOST
                 fp_delta = fencepost - type_val
