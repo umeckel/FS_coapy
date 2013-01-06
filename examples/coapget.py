@@ -5,13 +5,15 @@ import coapy.options
 import coapy.link
 import socket
 
+#python coapget.py --host 127.0.0.1 --port 5683 --uri-path /hello/
+
 uri_path = '/.well-known/'
 host = 'vs0.inf.ethz.ch'
 #host = 'ns.tzi.org'
 #host = '129.132.15.80'
 host = '127.0.0.1'
 #port = 5683 
-port = coapy.COAP_PORT
+port = coapy.COAP_PORT + 1
 verbose = False
 output_path = None
 block_option = None
@@ -45,6 +47,7 @@ if socket.AF_INET == address_family:
 elif socket.AF_INET6 == address_family:
     remote = (host, port, 0, 0)
 req = coapy.connection.Message(code=coapy.GET, uri_path=uri_path)
+print req.options
 if block_option is not None:
     req.addOption(block_option)
 
@@ -81,7 +84,7 @@ while True:
             print 'Confirmable message mismatched path'
             rv.reset()
             continue
-        if coapy.OK != msg.code:
+        if coapy.CONTENT != msg.code:
             print 'Async pertinent response code not OK: %d (%s)' % (msg.code, coapy.codes.get(msg.code, 'UNDEFINED'))
             rv.ack()
             break
@@ -94,7 +97,7 @@ while True:
         if msg.RST == tx_rec.response_type:
             print 'Server responded with reset'
             break
-        if coapy.OK != msg.code:
+        if coapy.CONTENT != msg.code:
             if 0 != msg.code:
                 print 'Pertinent response code not OK: %d (%s)' % (msg.code, coapy.codes.get(msg.code, 'UNDEFINED'))
                 break
