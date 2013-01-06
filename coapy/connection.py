@@ -101,7 +101,7 @@ class Message (object):
     invoked with the parameter value to create an option that is
     associated with the message."""
 
-    def __init__ (self, transaction_type=CON, code=0, payload='', **kw):
+    def __init__ (self, transaction_type=CON, code=0, payload='', sockname=('127.0.0.1', coapy.COAP_PORT), **kw):
         """Create a Message instance.
 
         As a convenience, message options can be created from keyword
@@ -131,6 +131,7 @@ class Message (object):
         self.__code = code
         self.__options = {}
         self.__payload  = payload
+        self.__sockname = sockname
         for (k, v) in kw.iteritems():
             kw_type = self.OptionKeywords.get(k)
             if kw_type is not None:
@@ -250,7 +251,7 @@ class Message (object):
             uri = uri + uri_host[0].value
         else:
             #TODO How to get the Host?
-            uri = uri + coapy.options.UriHost.Default 
+            uri = uri + self.__sockname[0] 
 
 
         #Step 3
@@ -259,7 +260,7 @@ class Message (object):
             # TODO valid check
             uri = uri + ':' + uri_host[0].value
         else:
-            uri = uri + ':' + str(coapy.COAP_PORT)
+            uri = uri + ':' + str(self.__sockname[1])
 
         #Step 4 
         uri_path = self.findOption(coapy.options.UriPath)
@@ -346,7 +347,7 @@ class Message (object):
         return ''.join(data)
 
     @classmethod
-    def decode (cls, packed):
+    def decode (cls, packed, sockname):
         """Create a Message instance from a payload.
 
         This method decodes the payload, and returns a pair (*xid*,
@@ -625,9 +626,9 @@ class ReceptionRecord (object):
     - :attr:`.end_point`
     """
 
-    def __init__ (self, end_point, packed, remote):
+    def __init__ (self, end_point, packed, remote, sockname):
         self.__endPoint = end_point
-        (self.__transactionId, self.__message) = Message.decode(packed)
+        (self.__transactionId, self.__message) = Message.decode(packed, sockname)
         self.__remote = remote
         if Message.CON == self.__message.transaction_type:
             self.__responseType = None
@@ -1031,7 +1032,7 @@ class EndPoint (object):
                         raise
                 if evt & select.POLLIN:
                     (msg, remote) = sock.recvfrom(8192)
-                    rx_record = ReceptionRecord(self, msg, remote)
+                    rx_record = ReceptionRecord(self, msg, remote, sock.getsockname())
                     if rx_record.message.transaction_type in (Message.ACK, Message.RST):
                         tx_record = self.__pendingTransmissions.get(rx_record.transaction_id)
                         if tx_record is not None:
