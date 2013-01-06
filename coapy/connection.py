@@ -101,7 +101,7 @@ class Message (object):
     invoked with the parameter value to create an option that is
     associated with the message."""
 
-    def __init__ (self, transaction_type=CON, code=0, payload='', **kw):
+    def __init__ (self, transaction_type=CON, code=0, payload='', uri_path = '', **kw):
         """Create a Message instance.
 
         As a convenience, message options can be created from keyword
@@ -131,6 +131,16 @@ class Message (object):
         self.__code = code
         self.__options = {}
         self.__payload  = payload
+
+        # TODO FS_coapy
+        # bspw URI Path muss 'gestückelt' werden
+        # wird zum versenden von Nachrichten dringend benötigt
+        uripieces = uri_path.split('/')
+        for uripiece in uripieces:
+            if len(uripiece) == 0:
+                continue
+            self.addOption(coapy.options.UriPath(uripiece))
+
         for (k, v) in kw.iteritems():
             kw_type = self.OptionKeywords.get(k)
             if kw_type is not None:

@@ -5,7 +5,7 @@ import coapy.options
 import coapy.link
 import socket
 
-uri_path = '.well-known/'
+uri_path = '/.well-known/'
 host = 'vs0.inf.ethz.ch'
 #host = 'ns.tzi.org'
 #host = '129.132.15.80'
