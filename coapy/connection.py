@@ -143,7 +143,7 @@ class Message (object):
 
         The options are sorted in increasing value of option type.
         """
-        return tuple(sorted(self.__options.itervalues(), lambda _a,_b: cmp(_a.Type, _b.Type)))
+        return tuple(sorted(self.__options.itervalues(), lambda _a,_b: cmp(_a[0].Type, _b[0].Type)))
     options = property(_get_options)
 
     # TODO FS_coapy
@@ -164,7 +164,7 @@ class Message (object):
         """Add a new option instance.
 
         If the option is already present in message, its previous
-        value is replaced by the new one.
+        value(s) is replaced by the new one.
         """
         self.__options[type(opt)] = [opt]
         return self
@@ -259,7 +259,7 @@ class Message (object):
             # TODO valid check
             uri = uri + ':' + uri_host[0].value
         else:
-            uri = uri + ':' + coapy.constants.COAP_PORT
+            uri = uri + ':' + str(coapy.COAP_PORT)
 
         #Step 4 
         uri_path = self.findOption(coapy.options.UriPath)
@@ -369,7 +369,8 @@ class Message (object):
 
         # TODO Allow Repeatable Options
         for opt in options:
-            instance.__options[type(opt)] = opt
+            #instance.__options[type(opt)] = opt
+            instance.addOption(opt)
         return (transaction_id, instance)
 
 def is_multicast (address):

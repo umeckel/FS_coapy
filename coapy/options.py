@@ -633,38 +633,39 @@ def encode (options, ignore_if_default=True):
     MAX_DELTA = 15
     OVER_LENGTH = 15
     num_options = 0
-    for opt in option_list:
-        if opt.is_default() and ignore_if_default:
-            continue
-        delta = opt.Type - type_val
-        while MAX_DELTA < delta:
-            # Which Fencepost Option did we finally need? (14,28,42,...)
-            fencepost = (OPTION_TYPE_FENCEPOST * int((opt.Type + OPTION_TYPE_FENCEPOST - 1) / OPTION_TYPE_FENCEPOST)) - 1
-            # fp_multiplier (14 => 1,28 => 2,3 => 42,...)
-            fp_multiplier = fencepost / OPTION_TYPE_FENCEPOST
-            fp_delta = fencepost - type_val
-            # Did we need a intermediate Fencepost Option ?
-            while fp_delta > MAX_DELTA:
-                fp_multiplier = fp_multiplier - 1
-                fencepost = fp_multiplier * OPTION_TYPE_FENCEPOST
-                fp_delta = fencepost - type_val
-
-            # Option with delta fp_delta and length 0 (empty) 
-            packed_pieces.append(chr(fp_delta << 4))
-            num_options += 1
-            type_val = fencepost
+    for optiontypelist in option_list:
+        for opt in optiontypelist:
+            if opt.is_default() and ignore_if_default:
+                continue
             delta = opt.Type - type_val
-        length = opt.length
-        if OVER_LENGTH <= length:
-            length -= OVER_LENGTH
-            if 255 < length:
-                raise Exception('Option length too large')
-            packed_pieces.append(chr((delta << 4) + OVER_LENGTH) + chr(length))
-        else:
-            packed_pieces.append(chr((delta << 4) + length))
-        packed_pieces.append(opt.packed)
-        type_val += delta
-        num_options += 1
+            while MAX_DELTA < delta:
+                # Which Fencepost Option did we finally need? (14,28,42,...)
+                fencepost = (OPTION_TYPE_FENCEPOST * int((opt.Type + OPTION_TYPE_FENCEPOST - 1) / OPTION_TYPE_FENCEPOST)) - 1
+                # fp_multiplier (14 => 1,28 => 2,3 => 42,...)
+                fp_multiplier = fencepost / OPTION_TYPE_FENCEPOST
+                fp_delta = fencepost - type_val
+                # Did we need a intermediate Fencepost Option ?
+                while fp_delta > MAX_DELTA:
+                    fp_multiplier = fp_multiplier - 1
+                    fencepost = fp_multiplier * OPTION_TYPE_FENCEPOST
+                    fp_delta = fencepost - type_val
+
+                # Option with delta fp_delta and length 0 (empty) 
+                packed_pieces.append(chr(fp_delta << 4))
+                num_options += 1
+                type_val = fencepost
+                delta = opt.Type - type_val
+            length = opt.length
+            if OVER_LENGTH <= length:
+                length -= OVER_LENGTH
+                if 255 < length:
+                    raise Exception('Option length too large')
+                packed_pieces.append(chr((delta << 4) + OVER_LENGTH) + chr(length))
+            else:
+                packed_pieces.append(chr((delta << 4) + length))
+            packed_pieces.append(opt.packed)
+            type_val += delta
+            num_options += 1
     return (num_options, ''.join(packed_pieces))
 
 # TODO FS_coapy (Nothing Change here?)
@@ -687,11 +688,13 @@ def decode (num_options, payload):
 
     type_val = 0
     options = set()
+    print num_options,'Optionen zum decoden'
     while 0 < num_options:
         num_options -= 1
         value_start_index = 1
         odl = ord(payload[0])
         type_val += (odl >> 4)
+        print 'Option Type:',type_val
         length = odl & 0x0F
         if 15 == length:
             length += ord(payload[value_start_index])
@@ -701,10 +704,12 @@ def decode (num_options, payload):
         if 0 != (type_val % OPTION_TYPE_FENCEPOST):
             option_class = Registry.get(type_val)
             if option_class is not None:
+                print 'add'
                 options.add(option_class.unpack(payload[value_start_index:value_end_index]))
             elif not option_type_is_elective(type_val):
                 raise UnrecognizedOptionError(type_val, payload[value_start_index:value_end_index])
         payload = payload[value_end_index:]
+    print options
     return (options, payload)
 
 Registry = { }

@@ -41,7 +41,7 @@ class DiscoverRessource(coapy.link.LinkValue):
 
     def __init__ (self, *args, **kw):
         global _ressource
-        super(DiscoverRessource, self).__init__('.well-known/core', ct=[coapy.media_types_rev.get('application/link-format')])
+        super(DiscoverRessource, self).__init__('/.well-known/core', ct=[coapy.media_types_rev.get('application/link-format')])
         _ressource = { self.uri : self }
 
     def add_Ressource (self, ressource):
@@ -78,7 +78,7 @@ class GetRessource(coapy.link.LinkValue):
 CoAPServer = DiscoverRessource()
 # WTF is going on?
 #CoAPServer.add_Ressource(coreRessource('.well-known/core'))
-CoAPServer.add_Ressource(GetRessource('hello'))
+CoAPServer.add_Ressource(GetRessource('/hello'))
 
 while True:
     rx_rec = ep.process(1000)
@@ -112,15 +112,20 @@ while True:
         rx_rec.reset()
 
     print 'Options'
-    for o in msg.options:
-        print o
-        print o.value
+    for otypelist in msg.options:
+        for o in otypelist:
+            print o
+            print o.value
     uri = msg.findOption(coapy.options.UriPath)
     if uri is None:
         continue
-    res = CoAPServer.lookup(uri.value)
+    uripath = ''
+    for pathpiece in uri:
+        uripath = uripath+'/'+pathpiece.value
+    print uripath
+    res = CoAPServer.lookup(uripath)
     if res is None:
-        print 'URI',uri.value,'not supported'
+        print 'URI',uripath,'not supported'
         rx_rec.reset()
         continue
 
