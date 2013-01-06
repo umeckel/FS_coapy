@@ -2,6 +2,8 @@ CoAPy -- Constrained Application Protocol: Python
 Version 0.0.3-DEV
 
 Home page: http://coapy.sourceforge.net/
+Updating from coap-03 -> coap-08 unter:
+https://github.com/umeckel/FS_coapy
 
 Sources: git://coapy.git.sourceforge.net/gitroot/coapy/coapy
 

@@ -80,6 +80,10 @@ CoAPServer = DiscoverRessource()
 #CoAPServer.add_Ressource(coreRessource('.well-known/core'))
 CoAPServer.add_Ressource(GetRessource('/hello'))
 
+
+print 'Server Adresse',ep._get_address()
+print 'Server Port',ep._get_port()
+
 while True:
     rx_rec = ep.process(1000)
     if rx_rec is None:

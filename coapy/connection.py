@@ -282,7 +282,8 @@ class Message (object):
                 uri = uri + uri_query[0].value
             for uq in uri_query[1:]:
                 uri = uri + '&' + up.value
-        
+       
+        return uri
         # OLD URI Build with coap-03 with UriScheme/Authority Option
         #
         #uri_scheme = self.findOption(coapy.options.UriScheme)
@@ -799,6 +800,7 @@ class EndPoint (object):
         self.register(self.__socket)
 
     __address = None
+    __port = None
     def bind (self, address):
         """Bind the end-point to the given address.
 
@@ -807,10 +809,18 @@ class EndPoint (object):
         """
         self.__socket.bind(address)
         self.register(self.__socket)
+        self.__address = address[0]
+        self.__port = address[1]
+
     def _get_address (self):
         """Return the end-point address."""
         return self.__address
     address = property(_get_address)
+    
+    def _get_port (self):
+        """Return the end-point port."""
+        return self.__port
+    port = property(_get_port)
 
     def bindDiscovery (self, interface_address):
         """Listen for CoAP discovery messages on the specified interface.
