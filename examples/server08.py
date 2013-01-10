@@ -76,8 +76,6 @@ class GetRessource(coapy.link.LinkValue):
         rx_record.ack(msg)
 
 CoAPServer = DiscoverRessource()
-# WTF is going on?
-#CoAPServer.add_Ressource(coreRessource('.well-known/core'))
 CoAPServer.add_Ressource(GetRessource('/hello'))
 
 
@@ -106,11 +104,11 @@ while True:
     if msg.code == coapy.GET:
         print 'GET Message on URI',msg.build_uri()
     elif msg.code == coapy.DELETE:
-        print 'GET Message on URI',msg.build_uri()
+        print 'DELETE Message on URI',msg.build_uri()
     elif msg.code == coapy.POST:
-        print 'GET Message on URI',msg.build_uri()
+        print 'POST Message on URI',msg.build_uri()
     elif msg.code == coapy.PUT:
-        print 'GET Message on URI',msg.build_uri()
+        print 'PUT Message on URI',msg.build_uri()
     else:
         print 'Message Code Unknown (',msg.code,') on',msg.build_uri()
         rx_rec.reset()

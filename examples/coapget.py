@@ -109,6 +109,7 @@ while True:
         outfile.write(msg.payload)
 
     ct = msg.findOption(coapy.options.ContentType)
+#    if ct is not None: ct = ct[0]
     if (ct is None) or (ct.value_as_string.startswith('text/')):
         print msg.payload
     elif 'application/link-format' == ct.value_as_string:

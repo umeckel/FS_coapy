@@ -330,6 +330,8 @@ class ContentType (_Base):
 
     @classmethod
     def unpack (cls, packed):
+        if len(packed) == 0:
+            return cls(0)
         return cls(struct.unpack('B', packed)[0])
 
     #:
