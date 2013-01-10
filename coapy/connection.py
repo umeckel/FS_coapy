@@ -207,7 +207,14 @@ class Message (object):
         :param opt: An option, specified as an option instance, an
           option class, or the type code of an option.
         """
-        return self.__options.get(self._classForOption(opt))
+        option = self.__options.get(self._classForOption(opt))
+        if option is None:
+            return None
+        else:
+            if option[0].Repeatable:
+                return option
+            else:
+                return option[0]
 
     __transactionType = None
     def _get_transaction_type (self):
