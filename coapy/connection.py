@@ -230,7 +230,10 @@ class Message (object):
     def _get_code (self):
         """The integral request method code or response code of the message."""
         return self.__code
-    code = property(_get_code)
+    def _set_code (self,code):
+        """The integral request method code or response code of the message."""
+        self.__code = code
+    code = property(_get_code,_set_code)
 
     __payload = ''
     def _get_payload (self):

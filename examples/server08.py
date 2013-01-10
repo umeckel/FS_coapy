@@ -57,26 +57,71 @@ class DiscoverRessource(coapy.link.LinkValue):
         msg.payload = ",".join([ _r.encode() for _r in _ressource.itervalues() ])
         rx_record.ack(msg)
 
-class coreRessource(coapy.link.LinkValue):
-    def process (self, rx_record):
-        global _ressource
-        msg = coapy.connection.Message(coapy.connection.Message.ACK, code=coapy.OK, content_type='application/link-format')
-        msg.payload = ",".join([ _r.encode() for _r in _ressource.itervalues() ])
-        print 'ressources'
-        for r in _ressource.itervalues():
-            print r
-        rx_record.ack(msg)
-    
-
 class GetRessource(coapy.link.LinkValue):
     
+
+    def __init__(self,uri):
+        coapy.link.LinkValue.__init__(self,uri)
+
+        self._var = 'Init Value'
+
     def process (self, rx_record):
-        
-        msg = coapy.connection.Message(coapy.connection.Message.ACK, code=coapy.CONTENT, payload='Hello World')
+        rx_msg = rx_record.message
+
+        if rx_msg.transaction_type == coapy.connection.Message.CON:
+            msg = coapy.connection.Message(transaction_type=coapy.connection.Message.ACK) 
+        else:
+            msg = coapy.connection.Message(transaction_type=coapy.connection.Message.NON) 
+
+        tok_opt = rx_msg.findOption(coapy.options.Token)
+        if tok_opt != None:
+            msg.addOption(tok_opt)
+
+        if rx_msg.code != coapy.GET:
+            msg.code=coapy.METHOD_NOT_ALLOWED
+            rx_record.ack(msg)
+
+        msg.payload = self._var
+        msg.code=coapy.CONTENT
         rx_record.ack(msg)
 
+class PutRessource(coapy.link.LinkValue):
+    
+    def __init__(self,uri):
+        coapy.link.LinkValue.__init__(self,uri)
+
+        self._var = 'Init Value'
+
+    def process (self, rx_record):
+        rx_msg = rx_record.message
+
+        if rx_msg.transaction_type == coapy.connection.Message.CON:
+            msg = coapy.connection.Message(transaction_type=coapy.connection.Message.ACK) 
+        else:
+            msg = coapy.connection.Message(transaction_type=coapy.connection.Message.NON) 
+
+        tok_opt = rx_msg.findOption(coapy.options.Token)
+        if tok_opt != None:
+            msg.addOption(tok_opt)
+
+        if rx_msg.code == coapy.GET:
+            msg.payload = self._var
+            msg.code=coapy.CONTENT
+            rx_record.ack(msg)
+        elif rx_msg.code == coapy.PUT:
+            self._var = rx_msg.payload
+
+            msg.code=coapy.CHANGED
+            rx_record.ack(msg)
+        else:
+            msg.code=coapy.METHOD_NOT_ALLOWED
+            rx_record.ack(msg)
+
+   
+
 CoAPServer = DiscoverRessource()
-CoAPServer.add_Ressource(GetRessource('/hello'))
+CoAPServer.add_Ressource(GetRessource('/getter'))
+CoAPServer.add_Ressource(PutRessource('/putter'))
 
 
 print 'Server Adresse',ep._get_address()
