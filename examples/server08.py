@@ -128,7 +128,7 @@ print 'Server Adresse',ep._get_address()
 print 'Server Port',ep._get_port()
 
 while True:
-    rx_rec = ep.process(1000)
+    rx_rec = ep.process(10000)
     if rx_rec is None:
         print 'No message recieve'
         continue

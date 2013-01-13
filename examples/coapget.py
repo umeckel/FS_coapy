@@ -6,6 +6,7 @@ import coapy.link
 import socket
 
 #python coapget.py --host 127.0.0.1 --port 5683 --uri-path /hello/
+#python coapget.py --host bbbb::ff:fe00:2222 --port 5683 -6 --uri-path /Getcolor
 
 uri_path = '/.well-known/'
 host = 'vs0.inf.ethz.ch'

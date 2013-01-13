@@ -4,6 +4,8 @@ import coapy.connection
 import time
 import socket
 
+#python coapput.py --host bbbb::ff:fe00:2222 --port 5683 -6 --uri-path /leds --payload=mode=abc
+
 uri_path = 'sink'
 host = 'ns.tzi.org'
 port = 61616
@@ -35,7 +37,7 @@ if socket.AF_INET == address_family:
 elif socket.AF_INET6 == address_family:
     remote = (host, port, 0, 0)
 ep = coapy.connection.EndPoint(address_family=address_family)
-ep.socket.bind(('', coapy.COAP_PORT))
+ep.socket.bind(('', coapy.COAP_PORT+1))
 
 def wait_for_response (ep, txr):
     global verbose

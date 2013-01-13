@@ -37,6 +37,8 @@ import types
 import struct
 import binascii
 
+OPTION_TYPE_FENCEPOST = 14
+
 def length_of_vlint (value):
     """
     :param value: Any non-negative integral value
@@ -529,20 +531,37 @@ class IfNoneMatch (_Base):
 
 # TODO Observe Option
 
-class Block (_Base):
+# The Block Option ( draft-ietf-core-block-04 )
+# Request 
+#   Block1(PUT/POST)
+#       Identified the sending block 
+#       M == 1 - Payload is Size of Power of two given by blocksize
+#       M == 0 Last block ( must not have this size )
+#   Block2(GET)
+#       Request a specific block (identified by block number)
+#       M bit MUST set to zero
+# Response
+#   Block1(PUT/POST)
+#       Indicates what block number is being acknowledged
+#   Block2
+#       Identified the recieving block(GET)
+#       M == 1 - Payload is Size of Power of two given by blocksize
+#       M == 0 Last block ( must not have this size )
+#       
+class _Block (_Base):
     """Support block-wise transfers of large resources.
 
     :warning: This is an experimental option.  See `draft-bormann-core-misc <http://tools.ietf.org/html/draft-bormann-coap-misc>`_
     """
     
-    Type = 13
-    Name = 'Block'
-    Default = None
+    Type = None
+    Name = '_Block'
+    Default = 0
 
     MIN_SIZE_EXPONENT = 4
     """The minimum supported size for resource blocks is 2^4 or 16 octets."""
 
-    MAX_SIZE_EXPONENT = 11
+    MAX_SIZE_EXPONENT = 10
     """The maximum supported size for resource blocks is 2^11 or 2048 octets."""
 
     def _calculate_value (self):
@@ -573,7 +592,7 @@ class Block (_Base):
     @classmethod
     def unpack (cls, packed):
         v = unpack_vlint(packed)
-        return cls(block_number=(v >> 4), more=not not 0x08 & v, size_exponent=4 + (0x07 & v))
+        return cls(block_number=(v >> 4), more=bool(0x08 & v), size_exponent=4 + (0x07 & v))
 
     def _get_block_number (self):
         """The block number, starting at zero for the first block."""
@@ -600,7 +619,12 @@ class Block (_Base):
     def __str__ (self):
         return '%s: blk=%d, m=%d, sze=%d' % (self.Name, self.__blockNumber, self.__more, self.__sizeExponent)
 
-OPTION_TYPE_FENCEPOST = 14
+class _Block1 (_Block):
+    Type = 19
+    Name = 'Block1'
+class _Block2 (_Block):
+    Type = 17
+    Name = 'Block2'
 
 class UnrecognizedOptionError (Exception):
     def __init__ (self, option_type, option_value):
