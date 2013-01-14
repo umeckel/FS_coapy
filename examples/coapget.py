@@ -120,12 +120,12 @@ while True:
             print '  %s' % (link.encode(),)
     else:
         print 'Unhandled content type %s: %s' % (ct.value, binascii.hexlify(msg.payload))
-
-    block_option = msg.findOption(coapy.options.Block)
-    if block_option is None:
-        break
-    if block_option.more:
-        nblk = coapy.options.Block(block_number=block_option.block_number+1, size_exponent=block_option.size_exponent)
-        req.replaceOption(nblk)
-        tx_rec = ep.send(req, remote)
+    # TODO Block Option
+    #block_option = msg.findOption(coapy.options.Block)
+    #if block_option is None:
+    #    break
+    #if block_option.more:
+    #    nblk = coapy.options.Block(block_number=block_option.block_number+1, size_exponent=block_option.size_exponent)
+    #    req.replaceOption(nblk)
+    #    tx_rec = ep.send(req, remote)
 
