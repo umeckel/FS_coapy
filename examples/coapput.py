@@ -5,6 +5,7 @@ import time
 import socket
 
 #python coapput.py --host bbbb::ff:fe00:2222 --port 5683 -6 --uri-path /leds --payload=mode=abc
+#python coapput.py --host 127.0.0.1 --port 5683 -4 --uri-path /putter --payload=inhalt
 
 uri_path = 'sink'
 host = 'ns.tzi.org'
