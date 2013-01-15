@@ -653,7 +653,7 @@ def encode (options, ignore_if_default=True):
     :rtype: (:class:`int`, :class:`str`)
     :raises: :exc:`Exception` if a packed option exceeds the representable option length
     """
-    option_list = sorted(options, lambda _a,_b: cmp(_a.Type, _b.Type))
+    option_list = sorted(options, lambda _a,_b: cmp(_a[0].Type, _b[0].Type))
     packed_pieces = []
     type_val = 0
     MAX_DELTA = 15
