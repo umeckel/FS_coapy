@@ -49,7 +49,7 @@ MAX_RETRANSMIT = 4
 non-multicast endpoints before the infrastructure assumes no
 acknowledgement will be received."""
 
-codes = { 0: 'EMPTY'
+codes = { 0: 'EMPTY',
           1: 'GET',
           2: 'POST',
           3: 'PUT',
