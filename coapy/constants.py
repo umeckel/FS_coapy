@@ -49,7 +49,8 @@ MAX_RETRANSMIT = 4
 non-multicast endpoints before the infrastructure assumes no
 acknowledgement will be received."""
 
-codes = { 1: 'GET',
+codes = { 0: 'EMPTY'
+          1: 'GET',
           2: 'POST',
           3: 'PUT',
           4: 'DELETE',
@@ -86,6 +87,7 @@ codes = { 1: 'GET',
 #          202: '502 Bad Gateway',
 #          204: '504 Gateway Timeout' }
 
+EMPTY = 0
 GET = 1
 POST = 2
 PUT = 3
