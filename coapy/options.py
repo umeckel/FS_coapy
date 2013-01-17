@@ -543,6 +543,7 @@ class IfNoneMatch (_Base):
 # Response
 #   Block1(PUT/POST)
 #       Indicates what block number is being acknowledged
+#       Also send the preferred Block size
 #   Block2
 #       Identified the recieving block(GET)
 #       M == 1 - Payload is Size of Power of two given by blocksize

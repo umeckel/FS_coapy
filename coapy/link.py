@@ -232,6 +232,10 @@ class LinkValue (object):
         'n' : PVS_dquotedString,
         'ct' : PVS_commaSeparatedIntegers,
         'id' : PVS_integer,
+        'rt' : PVS_dquotedString,
+        'if' : PVS_dquotedString,
+        'sz' :PVS_integer,
+        'title' : PVS_dquotedString
         }
     """Map from param names to a subclass of
     :class:`ParameterValueSupport` that can encode and decode the value
@@ -252,6 +256,10 @@ class LinkValue (object):
     n = property(lambda _s: _s.__params.get('n'))
     ct = property(lambda _s: _s.__params.get('ct'))
     id = property(lambda _s: _s.__params.get('id'))
+    rt = property(lambda _s: _s.__params.get('rt'))
+    ifdesc = property(lambda _s: _s.__params.get('if'))
+    sz = property(lambda _s: _s.__params.get('sz'))
+    title = property(lambda _s: _s.__params.get('title'))
 
     @classmethod
     def decode (cls, text):
