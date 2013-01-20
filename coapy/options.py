@@ -620,10 +620,10 @@ class _Block (_Base):
     def __str__ (self):
         return '%s: blk=%d, m=%d, sze=%d' % (self.Name, self.__blockNumber, self.__more, self.__sizeExponent)
 
-class _Block1 (_Block):
+class Block1 (_Block):
     Type = 19
     Name = 'Block1'
-class _Block2 (_Block):
+class Block2 (_Block):
     Type = 17
     Name = 'Block2'
 
