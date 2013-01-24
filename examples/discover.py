@@ -58,7 +58,8 @@ sap_addresses = set()
 
 (if_sockaddr, mc_sockaddr) = coapy.connection.join_discovery(ep.socket, interface_address)
 discovery_msg = coapy.connection.Message()
-
+discovery_msg.addOption(coapy.options.UriPath('.well-known'))
+discovery_msg.addOption(coapy.options.UriPath('core'))
 discovery_tx_rec = ep.send(discovery_msg, mc_sockaddr)
 tx_rec = discovery_tx_rec
 

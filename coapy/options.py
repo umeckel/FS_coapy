@@ -715,13 +715,11 @@ def decode (num_options, payload):
 
     type_val = 0
     options = set()
-    print num_options,'Optionen zum decoden'
     while 0 < num_options:
         num_options -= 1
         value_start_index = 1
         odl = ord(payload[0])
         type_val += (odl >> 4)
-        print 'Option Type:',type_val
         length = odl & 0x0F
         if 15 == length:
             length += ord(payload[value_start_index])
@@ -731,12 +729,10 @@ def decode (num_options, payload):
         if 0 != (type_val % OPTION_TYPE_FENCEPOST):
             option_class = Registry.get(type_val)
             if option_class is not None:
-                print 'add'
                 options.add(option_class.unpack(payload[value_start_index:value_end_index]))
             elif not option_type_is_elective(type_val):
                 raise UnrecognizedOptionError(type_val, payload[value_start_index:value_end_index])
         payload = payload[value_end_index:]
-    print options
     return (options, payload)
 
 Registry = { }
@@ -746,6 +742,6 @@ Registry = { }
 #            Location, MaxAge, Etag, Block):
 for _opt in (ContentType,MaxAge,ProxyUri,Etag,UriHost,LocationPath,
              UriPort,LocationQuery,UriPath,Token,Accept,IfMatch,
-             UriQuery,IfNoneMatch):
+             UriQuery,IfNoneMatch,Block1,Block2):
     Registry[_opt.Type] = _opt
 
