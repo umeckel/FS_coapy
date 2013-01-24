@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # Copyright (c) 2010 People Power Co.
 # All rights reserved.
 # 
@@ -82,7 +84,7 @@ class Message (object):
 
     OptionKeywords = { 'content_type' : coapy.options.ContentType,
                        'max_age' : coapy.options.MaxAge,
-                       'proxi_uri' : coapy.options.ProxyUri,
+                       'proxy_uri' : coapy.options.ProxyUri,
                        'etag' : coapy.options.Etag,
                        'uri_host' : coapy.options.UriHost,
                        'location_path' : coapy.options.LocationPath,
@@ -136,11 +138,7 @@ class Message (object):
         # TODO FS_coapy
         # bspw URI Path muss 'gestückelt' werden
         # wird zum versenden von Nachrichten dringend benötigt
-        uripieces = uri_path.split('/')
-        for uripiece in uripieces:
-            if len(uripiece) == 0:
-                continue
-            self.addOption(coapy.options.UriPath(uripiece))
+        self.set_uri_path(uri_path)
 
         for (k, v) in kw.iteritems():
             kw_type = self.OptionKeywords.get(k)
@@ -249,6 +247,25 @@ class Message (object):
             raise ValueError()
         self.__payload = payload
     payload = property(_get_payload, _set_payload)
+
+    def get_uri_path(self):
+        uri = self.findOption(coapy.options.UriPath)
+        if uri is None:
+            uri = (coapy.options.UriPath(''),)
+        uripath = ''
+        for pathpiece in uri:
+            uripath = "{}/{}".format(uripath,pathpiece.value)
+        return uripath
+
+    def set_uri_path(self, uri_path):
+        if self.findOption(coapy.options.UriPath) is not None:
+            self.deleteOption(coapy.options.UriPath)
+        uripieces = uri_path.split('/')
+        for uripiece in uripieces:
+            if len(uripiece) > 0:
+                self.addOption(coapy.options.UriPath(uripiece))
+
+
 
     # TODO FS_coapy 
     def build_uri (self, explicit=False):
