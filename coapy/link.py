@@ -308,9 +308,9 @@ class LinkValue (object):
         for k in keys:
             v = self.__params[k]
             if v is None:
-                seq.append(k)
+                seq.append(k if k!='ifdesc' else 'if')
             else:
-                seq.append('%s=%s' % (k, self._LinkParameterDefinitions.get(k, self._DefaultLinkProcessing).encode(v)))
+                seq.append('%s=%s' % (k if k!='ifdesc' else 'if', self._LinkParameterDefinitions.get(k, self._DefaultLinkProcessing).encode(v)))
         return ';'.join(seq)
 
 def decode_resource_descriptions (text):
